@@ -1,0 +1,4 @@
+@charset "utf-8";
+html body{font-family:"Microsoft Yahei";}
+a,.page-link{color:#6B0DFA}
+.page-item.active .page-link{background-color:#6B0DFA;border-color:#6B0DFA;}
