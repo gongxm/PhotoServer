@@ -37,7 +37,8 @@ public class ImageFileCollectRunnable implements Runnable {
 		int TWO = hashCode&0xf;
 		
 		//存储路径
-		String path = MyConstants.DIR_PATH+File.separator+ONE+File.separator+TWO+File.separator+title;
+		String path = MyConstants.DIR_PATH+File.separator+ONE+File.separator+TWO+File.separator+title.replace("<", "").replace(">", "").replace("|", "").replace("\\", "").replace("/", "")
+				.replace(":", "").replace("*", "").replace("?", "").replace("\"", "");
 		
 		String cover = imageGroupInfo.getCover();
 		if(!cover.startsWith(MyConstants.TU_CHUANG)) {

@@ -1,7 +1,3 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -15,14 +11,7 @@
 	href="https://cdn.jsdelivr.net/npm/open-iconic@1.1.1/font/css/open-iconic-bootstrap.min.css">
 <link rel="stylesheet" type="text/css"
 	href="/static/css/style.css?v=<%out.print(Math.random());%>" />
-<title>${info.title}-国产- 秀人秀色图库</title>
-
-<style type="text/css">
-	.pageLine{
-		clear:both;
-	}
-</style>
-
+<title>${keyword}高清原图写真- 秀人秀色图库</title>
 </head>
 <body>
 	<nav
@@ -91,75 +80,48 @@
 		</div>
 	</nav>
 	<div class="container">
-		<div class="row">
-			<div class="col-md-12">
-				<nav aria-label="breadcrumb">
-					<ol class="breadcrumb p-0 bg-transparent">
-						<li class="breadcrumb-item"><a href="/"
-							class="text-decoration-none">首页</a></li>
+		<div class="row d-block d-sm-none">
+			<div class="col">
+				<div class="mb-2">
 
-						<c:forEach items="${tags}" var="item" begin="0" end="2">
+					<a href="/tag/国产" class="badge badge-light badge-pill">国产美女</a> <a
+						href="/tag/港台" class="badge badge-light badge-pill">港台美女</a> <a
+						href="/tag/日韩" class="badge badge-light badge-pill">日韩美女</a> <a
+						href="/album/国产名站" class="badge badge-light badge-pill">国产名站</a> <a
+						href="/album/港台名站" class="badge badge-light badge-pill">港台名站</a> <a
+						href="/album/日韩名站" class="badge badge-light badge-pill">日韩名站</a> <a
+						href="/album/国产模特" class="badge badge-light badge-pill">国产模特</a> <a
+						href="/album/港台模特" class="badge badge-light badge-pill">港台模特</a> <a
+						href="/album/日韩模特" class="badge badge-light badge-pill">日韩模特</a> <a
+						href="/album/风格" class="badge badge-light badge-pill">风格</a>
 
-							<li class="breadcrumb-item"><a href="/tag/${item.tag}"
-								class="text-decoration-none">${item.tag}</a></li>
-
-						</c:forEach>
-
-						<li class="breadcrumb-item active" aria-current="page">正文</li>
-					</ol>
-				</nav>
-				<h1 class="h6 font-weight-bold my-3">${info.title}</h1>
-				<p>
-					时间：
-					<fmt:formatDate value="${info.updateTime}" pattern="yyyy-MM-dd" />
-				</p>
-				<div class="row content">
-					<div class="col text-center">
-						<c:forEach items="${images}" var="item">
-							<p>
-								<a href="${item.url}" target="_blank" rel="nofollow"><img
-									src="${item.url}" alt="" class="mw-100"></a>
-							</p>
-						</c:forEach>
-					</div>
 				</div>
-
-				<div class="mb-3">
-					<c:forEach items="${tags}" var="item">
-						<a href="/tag/${item.tag}" class="badge badge-warning border">${item.tag}</a>
-					</c:forEach>
-				</div>
-
-
-				<div class="input-group mb-3" style="width: 200px; float: left;">
-					<div class="input-group-prepend">
-						<label class="input-group-text" for="pageNumber">每页显示数量:</label>
-					</div>
-					<select class="custom-select" id="pageNumber">
-						<option value="5">5</option>
-						<option value="10">10</option>
-						<option value="20">20</option>
-					</select>
-				</div>
-				<div class='pageLine'>
-					<%@ include file="page.jsp"%>
-				</div>
-			</div>
-			<div class="col-12 mb-3">
-				<h6 class="font-weight-bold">猜你喜欢</h6>
-				<div class="row mr-0 loading">
-
-					<c:forEach items="${recommendList}" var="item">
-						<div class="col-md-2 col-4 mb-3 pr-0">
-							<a href="/s/${item.id}" target="_blank"
-								class="text-dark text-decoration-none"> <img
-								src="${item.cover}" class="w-100">
-							</a>
+				<form action="/search" method="GET">
+					<div class="input-group mb-3">
+						<input type="text" class="form-control" placeholder="搜索图库"
+							name="q">
+						<div class="input-group-append">
+							<button class="btn btn-outline-primary" type="submit">搜索</button>
 						</div>
-					</c:forEach>
-
-				</div>
+					</div>
+				</form>
 			</div>
+		</div>
+
+		<div class="row">
+			<div class="col">
+				<h5 class="mb-3">
+					<span class="badge badge-pill badge-warning">${keyword}</span>
+				</h5>
+			</div>
+		</div>
+		<div class="row mr-0 text-nowrap">
+			<#list categories as item>
+				<div class="col-md-2 col-4 mb-2 pr-0">
+					<a href="/tag/${item.tag}" target="_blank"
+						class="btn btn-block btn-sm btn-outline-light page-link text-truncate">${item.tag}</a>
+				</div>
+			</#list>
 		</div>
 	</div>
 	<script
@@ -168,29 +130,5 @@
 		src="https://cdn.jsdelivr.net/npm/popper.js@1.15.0/dist/umd/popper.min.js"></script>
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
-	<script src="/static/js/load.min.js?v=<%out.print(Math.random());%>"></script>
-	<script
-		src="https://cdn.jsdelivr.net/npm/js-cookie@beta/dist/js.cookie.min.js"></script>
-
-
-	<script type="text/javascript">
-		$(function() {
-			$("#pageNumber").change(function() {
-				var number = $("#pageNumber").val();
-				setCookie('pageNumber', number);
-				window.location.reload()
-			})
-
-			$("#pageNumber").val("${pageNumber}");
-		})
-
-		function setCookie(name, value) {
-			var Days = 30;
-			var exp = new Date();
-			exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
-			document.cookie = name + "=" + escape(value) + ";expires="
-					+ exp.toGMTString();
-		}
-	</script>
 </body>
 </html>

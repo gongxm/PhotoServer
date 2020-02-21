@@ -1,7 +1,3 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -15,7 +11,7 @@
 	href="https://cdn.jsdelivr.net/npm/open-iconic@1.1.1/font/css/open-iconic-bootstrap.min.css">
 <link rel="stylesheet" type="text/css"
 	href="/static/css/style.css?v=<%out.print(Math.random());%>" />
-<title>${keyword}高清原图写真- 秀人秀色图库</title>
+<title>秀人秀色图库 - 每日更新模特高跟丝袜美腿套图</title>
 </head>
 <body>
 	<nav
@@ -112,20 +108,47 @@
 			</div>
 		</div>
 
-		<div class="row">
-			<div class="col">
-				<h5 class="mb-3">
-					<span class="badge badge-pill badge-warning">${keyword}</span>
-				</h5>
-			</div>
-		</div>
-		<div class="row mr-0 text-nowrap">
-			<c:forEach items="${categories}" var="item">
-				<div class="col-md-2 col-4 mb-2 pr-0">
-					<a href="/tag/${item.tag}" target="_blank"
-						class="btn btn-block btn-sm btn-outline-light page-link text-truncate">${item.tag}</a>
+		<#if (recommendList?size>0)>
+			<div class="row mr-0">
+				<div class="col-12">
+					<h6>
+						<span class="badge badge-pill badge-danger">今日推荐</span>
+					</h6>
 				</div>
-			</c:forEach>
+
+				<#list recommendList as item>
+					<div class="col-md-2 col-4 mb-3 pr-0">
+						<a href="/p/${item.id}" target="_blank"
+							class="text-dark text-decoration-none"> <img
+							src="${item.cover}" class="w-100">
+							<p class="my-1">${item.title}</p>
+						</a>
+					</div>
+				</#list>
+
+			</div>
+		</#if>
+
+
+		<div class="row mr-0">
+			<div class="col-12">
+				<h6>
+					<span class="badge badge-pill badge-warning">最新发布</span>
+				</h6>
+			</div>
+			<#list pageList as item>
+				<div class="col-md-2 col-4 mb-3 pr-0">
+					<a href="/p/${item.id}" target="_blank"
+						class="text-dark text-decoration-none"> <img
+						src="${item.cover}" class="w-100">
+						<p class="my-1">${item.title}</p>
+					</a>
+				</div>
+			</#list>
+
+			<div class="col-12">
+				<#include "page.ftl"/>
+			</div>
 		</div>
 	</div>
 	<script
@@ -134,5 +157,6 @@
 		src="https://cdn.jsdelivr.net/npm/popper.js@1.15.0/dist/umd/popper.min.js"></script>
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
+
 </body>
 </html>
