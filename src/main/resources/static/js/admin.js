@@ -88,4 +88,22 @@ $(function() {
 			}
 		})
 	})
+	
+	
+	
+	//定时任务
+	setInterval(function(){
+		$.ajax({
+			url:'/action/get_task_info.action',
+			data:{},
+			method:'get',
+			success:function(data){
+				if(data.errcode==1){
+					$("#count").html("运行中的任务数量: "+data.data.count)
+					$("#size").html("等待中的任务数量: "+data.data.size)
+				}
+			}
+		})
+		
+	},1000);
 });

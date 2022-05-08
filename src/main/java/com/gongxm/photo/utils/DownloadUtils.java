@@ -9,11 +9,13 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class DownloadUtils {
 	
-	public static void download(String dirPath,String fileName,String urlPath) throws IOException {
+	public static void download(String referer,String dirPath,String fileName,String urlPath) throws IOException {
 		
-		System.out.println("下载图片:"+fileName);
+		System.out.println("download image file:"+fileName);
 		
 		HttpsURLConnection con = HttpUtils.getHttpsURLConnection(urlPath, "GET");
+		
+		con.setRequestProperty("Referer", referer);
 		
 		//设置超时
 		con.setConnectTimeout(60000);
@@ -27,6 +29,8 @@ public class DownloadUtils {
 			dir.mkdirs();
 		}
 		File file = new File(dir,fileName);
+		
+		System.out.println("下载图片:"+file.getAbsolutePath());
 		
 		FileOutputStream fos = new FileOutputStream(file);
 		
@@ -42,4 +46,13 @@ public class DownloadUtils {
 		is.close();
 	}
 	
+	
+	public static void main(String[] args) throws IOException {
+		String dirPath="D:\\Documents\\Desktop\\test";
+		String urlPath="https://cdn.imgupio.com/eyJ1cmwiOiAiaHR0cDovL3d3dy5ubGVncy5jb20vaW1hZ2VzLzIwMjAvMDcvMjUvMTU3MjYvSTE1OWtmLmpwZyIsICJyZWZlcmVyIjogImh0dHBzOi8vd3d3Lm5sZWdzLmNvbS8ifQ==";
+		String fileName = MD5Utils.creatID(urlPath)+".jpg";
+		String referer = "";
+		download(referer,dirPath, fileName, urlPath);
+		
+	}
 }

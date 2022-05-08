@@ -18,6 +18,7 @@ import com.gongxm.photo.runnable.ImageGroupCollectRunnable;
 import com.gongxm.photo.runnable.ImageInfoCollectRunnable;
 import com.gongxm.photo.runnable.ImagePageCollectRunnable;
 import com.gongxm.photo.service.ImageGroupInfoService;
+import com.gongxm.photo.service.ImageService;
 import com.gongxm.photo.service.PhotoService;
 import com.gongxm.photo.utils.ThreadPoolUtils;
 
@@ -27,6 +28,8 @@ import com.gongxm.photo.utils.ThreadPoolUtils;
 public class CollectAction {
 	@Autowired
 	PhotoService photoService;
+	@Autowired
+	ImageService imageService;
 	@Autowired
 	ImageGroupInfoService imageGroupInfoService;
 	@Value("${startIndex}")
@@ -38,11 +41,11 @@ public class CollectAction {
 	@RequestMapping("create_url_list.action")
 	public ResponseResult createUrlList() {
 		ResponseResult result = new ResponseResult();
-		String baseUrl = "https://digfire.com/page/";
-		System.out.println("startIndex="+startIndex);
-		System.out.println("endIndex="+endIndex);
+		String baseUrl = "https://kuqur.com/page/";
+		System.out.println("startIndex=" + startIndex);
+		System.out.println("endIndex=" + endIndex);
 		for (int i = startIndex; i <= endIndex; i++) {
-			System.out.println("正在插入:" + i);
+			System.out.println("insert collect url:" + i);
 			photoService.addListUrl(baseUrl + i);
 		}
 		result.setSuccess();
@@ -63,7 +66,7 @@ public class CollectAction {
 			List<ListUrl> list = photoService.findUnCollectListUrl(page, pageSize);
 			for (ListUrl listUrl : list) {
 				Runnable task = new ImageGroupCollectRunnable(listUrl);
-				ThreadPoolUtils.executeOnNewThread(task);
+				ThreadPoolUtils.execute(task);
 			}
 			page++;
 		}
@@ -86,7 +89,7 @@ public class CollectAction {
 			List<ImageGroupInfo> list = imageGroupInfoService.findUnCollectImageGroup(page, pageSize);
 			for (ImageGroupInfo groupInfo : list) {
 				Runnable task = new ImagePageCollectRunnable(groupInfo);
-				ThreadPoolUtils.executeOnNewThread(task);
+				ThreadPoolUtils.execute(task);
 			}
 			page++;
 		}
@@ -109,7 +112,7 @@ public class CollectAction {
 			List<ImagePage> list = photoService.findUnCollectImagePage(page, pageSize);
 			for (ImagePage imagePage : list) {
 				Runnable task = new ImageInfoCollectRunnable(imagePage);
-				ThreadPoolUtils.executeOnNewThread(task);
+				ThreadPoolUtils.execute(task);
 			}
 			page++;
 		}
@@ -123,16 +126,16 @@ public class CollectAction {
 	public ResponseResult collectImageFile() {
 		ResponseResult result = new ResponseResult();
 
-		int total = photoService.getImageInfoUnCollectCount();
+		int total = imageService.getImageInfoUnCollectCount();
 		int page = 1;
 		int pageSize = 20;
 		int temp = total / pageSize;
 		int totalPage = total % pageSize == 0 ? temp : temp + 1;
 		while (page <= totalPage) {
-			List<ImageInfo> list = photoService.findUnCollectImageInfo(page, pageSize);
+			List<ImageInfo> list = imageService.findUnCollectImageInfo(page, pageSize);
 			for (ImageInfo imageInfo : list) {
 				Runnable task = new ImageFileCollectRunnable(imageInfo);
-				ThreadPoolUtils.executeOnNewThread(task);
+				ThreadPoolUtils.execute(task);
 			}
 			page++;
 		}
@@ -144,12 +147,11 @@ public class CollectAction {
 	// 定时更新
 	@RequestMapping("update_image_group_info.action")
 	public void updateListUrl() {
-		System.out.println(".........定时更新图片组信息........");
-		for (int i = 1; i < 3; i++) {
-			ListUrl listUrl = photoService.getListUrlById(i);
-			Runnable task = new ImageGroupCollectRunnable(listUrl);
-			ThreadPoolUtils.executeOnNewThread(task);
-		}
+		System.out.println(".........update ListUrl........");
+		ListUrl listUrl = photoService.getListUrlById(818);
+		System.out.println("listUrl:" + listUrl.getUrl());
+		Runnable task = new ImageGroupCollectRunnable(listUrl);
+		ThreadPoolUtils.execute(task);
 	}
 
 }

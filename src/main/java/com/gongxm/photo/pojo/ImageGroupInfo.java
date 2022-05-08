@@ -3,22 +3,24 @@ package com.gongxm.photo.pojo;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.apache.solr.client.solrj.beans.Field;
+
 import com.gongxm.photo.MyConstants;
 import com.gongxm.photo.utils.MD5Utils;
 
 public class ImageGroupInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
-
+	@Field
 	private String id;
-
+	@Field("group_cover")
     private String cover;
-
+	@Field("group_title")
     private String title;
-
+	@Field("group_url")
     private String url;
-
+	@Field("group_update_time")
     private Date updateTime = new Date();
-
+	@Field("group_status")
     private Integer status = MyConstants.COLLECT_STATUS_UNCOLLECT;
     
     public ImageGroupInfo() {

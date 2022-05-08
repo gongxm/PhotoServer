@@ -20,8 +20,6 @@ public interface ImageGroupInfoService {
 
 	void addImageGroupInfo(ImageGroupInfo groupInfo);
 
-	ImageGroupInfo findImageGroupInfoByUrl(String absUrl);
-
 	int getImageGroupUnCollectCount();
 
 	List<ImageGroupInfo> findUnCollectImageGroup(int page, int pageSize);

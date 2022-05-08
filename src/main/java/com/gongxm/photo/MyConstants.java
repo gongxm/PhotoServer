@@ -13,10 +13,18 @@ public interface MyConstants {
 	
 	//图片存储位置
 //	public String DIR_PATH = "/www/wwwroot/tuchuang";
-	public String DIR_PATH = "F:\\PhotoData";
+//	public String DIR_PATH = "F:\\PhotoData";
+	//静态页面保存位置
+//	public String STATIC_DIR = "/www/wwwroot/photos/";
+//	public String STATIC_DIR = "E:\\www\\photos\\";
 	
 	//图床链接
 	public String TU_CHUANG = "https://tuchuang.gongxm.com";
 	
-
+	
+	public int SUCCESS = 1;
+	public int FAILURE = 0;
+	
+	
+	
 }

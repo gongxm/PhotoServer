@@ -14,7 +14,18 @@
 <script src="/static/js/feather.min.js"></script>
 <link href="/static/css/bootstrap.css" rel="stylesheet">
 
-<script src="/static/js/index.js"></script>
+<script src="/static/js/admin.js"></script>
+
+<style>
+
+.task-box{
+	margin:50px auto;
+	width:50%;
+	height:500px;
+	border:1px solid #ff0000;
+}
+  
+</style>
 
 <title>图片管理系统</title>
 </head>
@@ -42,6 +53,14 @@
 				<button type="button" id="collect-image-file" class="btn btn-danger">采集图片文件</button>
 			</div>
 		</div>
+		<div class="text-center  task-box"> 
+			线程任务信息:  <br/>
+			
+			<div id="count">运行中的任务数量: 0</div>
+			<div id="size">等待中的任务数量: 0</div>
+			
+		</div>
+		
 	</div>
 </body>
 </html>

@@ -2,20 +2,22 @@ package com.gongxm.photo.pojo;
 
 import java.io.Serializable;
 
+import org.apache.solr.client.solrj.beans.Field;
+
 import com.gongxm.photo.MyConstants;
 import com.gongxm.photo.utils.MD5Utils;
 
 public class ImageInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
-
+	@Field
 	private String id;
-
+	@Field("image_url")
     private String url;
-
+	@Field("image_status")
     private Integer status = MyConstants.COLLECT_STATUS_UNCOLLECT;
-
+	@Field("image_position")
     private Integer position;
-
+	@Field("image_group_id")
     private String imageGroupId;
     
     public ImageInfo() {

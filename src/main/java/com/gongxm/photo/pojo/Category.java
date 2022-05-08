@@ -2,13 +2,15 @@ package com.gongxm.photo.pojo;
 
 import java.io.Serializable;
 
+import org.apache.solr.client.solrj.beans.Field;
+
 public class Category implements Serializable{
 	private static final long serialVersionUID = 1L;
-
+	@Field
 	private Integer id;
-
+	@Field("category_tag")
     private String tag;
-
+	@Field("category_type")
     private String type;
 
     public Category(String tag, String type) {

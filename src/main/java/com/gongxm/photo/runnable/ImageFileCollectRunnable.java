@@ -5,16 +5,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import com.gongxm.photo.BeanContext;
+import com.gongxm.photo.Config;
 import com.gongxm.photo.MyConstants;
 import com.gongxm.photo.pojo.ImageGroupInfo;
 import com.gongxm.photo.pojo.ImageInfo;
 import com.gongxm.photo.service.ImageGroupInfoService;
-import com.gongxm.photo.service.PhotoService;
+import com.gongxm.photo.service.ImageService;
 import com.gongxm.photo.utils.DownloadUtils;
 import com.gongxm.photo.utils.MD5Utils;
 
 public class ImageFileCollectRunnable implements Runnable {
-
+	
 	private ImageInfo imageInfo;
 
 	public ImageFileCollectRunnable(ImageInfo imageInfo) {
@@ -24,8 +25,9 @@ public class ImageFileCollectRunnable implements Runnable {
 	@Override
 	public void run() {
 		String url = imageInfo.getUrl();
-		System.out.println("下载图片:"+url);
+		System.out.println("download image:"+url);
 		ImageGroupInfoService imageGroupInfoService = BeanContext.getApplicationContext().getBean(ImageGroupInfoService.class);
+		Config config = BeanContext.getApplicationContext().getBean(Config.class);
 		String imageGroupId = imageInfo.getImageGroupId();
 		ImageGroupInfo imageGroupInfo = imageGroupInfoService.findImageGroupInfoById(imageGroupId);
 		String title = imageGroupInfo.getTitle();
@@ -36,19 +38,20 @@ public class ImageFileCollectRunnable implements Runnable {
 		//计算二级目录
 		int TWO = hashCode&0xf;
 		
+		String image_path = config.getImagePath();
 		//存储路径
-		String path = MyConstants.DIR_PATH+File.separator+ONE+File.separator+TWO+File.separator+title.replace("<", "").replace(">", "").replace("|", "").replace("\\", "").replace("/", "")
+		String path = image_path +File.separator+ONE+File.separator+TWO+File.separator+title.replace("<", "").replace(">", "").replace("|", "").replace("\\", "").replace("/", "")
 				.replace(":", "").replace("*", "").replace("?", "").replace("\"", "");
-		
 		String cover = imageGroupInfo.getCover();
+		String referer = imageGroupInfo.getUrl();
 		if(!cover.startsWith(MyConstants.TU_CHUANG)) {
 			try {
-				DownloadUtils.download(path, "cover.jpg", cover);
-				imageGroupInfo.setCover((path.replace(MyConstants.DIR_PATH, MyConstants.TU_CHUANG)+File.separator+"cover.jpg").replace("\\", "/"));
+				DownloadUtils.download(referer,path, "cover.jpg", cover);
+				imageGroupInfo.setCover((path.replace(image_path, MyConstants.TU_CHUANG)+File.separator+"cover.jpg").replace("\\", "/"));
 				imageGroupInfoService.updateImageGroupInfo(imageGroupInfo);
 			} catch (IOException e) {
 				if(e instanceof FileNotFoundException) {
-					System.out.println("封面文件不存在!");
+					System.out.println("cover not found!");
 				}else {
 					e.printStackTrace();
 				}
@@ -60,17 +63,17 @@ public class ImageFileCollectRunnable implements Runnable {
 		}
 		
 		String fileName = MD5Utils.creatID(url)+".jpg";
-		PhotoService photoService = BeanContext.getApplicationContext().getBean(PhotoService.class);
+		ImageService imageService = BeanContext.getApplicationContext().getBean(ImageService.class);
 		try {
-			DownloadUtils.download(path, fileName, url);
-			imageInfo.setUrl((path.replace(MyConstants.DIR_PATH, MyConstants.TU_CHUANG)+File.separator+fileName).replace("\\", "/"));
+			DownloadUtils.download(referer,path, fileName, url);
+			imageInfo.setUrl((path.replace(image_path, MyConstants.TU_CHUANG)+File.separator+fileName).replace("\\", "/"));
 			imageInfo.setStatus(MyConstants.COLLECT_STATUS_COLLECTED);
-			photoService.updateImageInfo(imageInfo);
+			imageService.updateImageInfo(imageInfo);
 		} catch (IOException e) {
 			if(e instanceof FileNotFoundException) {
-				System.out.println("图片文件不存在!");
+				System.out.println("image not found!");
 				imageInfo.setStatus(MyConstants.COLLECT_STATUS_FAILURE);
-				photoService.updateImageInfo(imageInfo);
+				imageService.updateImageInfo(imageInfo);
 			}else {
 				e.printStackTrace();
 			}

@@ -1,84 +1,83 @@
 package com.gongxm.photo.utils;
 
-import java.util.LinkedList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadPoolUtils {
-	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(50, 500, 60L, TimeUnit.SECONDS,
-			new LinkedBlockingQueue<Runnable>()); 
+	// 线程池相关参数
+	private static final int CORE_POOL_SIZE = 5;
+	private static final int MAXIMUM_POOL_SIZE = 50;
+	private static final long TIMEOUT = 5L;
+	private static final int QUEUE_SIZE = 5;
+	private static final int MAX_TASK_COUNT = MAXIMUM_POOL_SIZE + QUEUE_SIZE;
 
-	private static LinkedList<Runnable> tasks = new LinkedList<>();
-	private static int taskCount = 0; // 运行中的线程数量
-	private static final int MAX = 50; // 最大线程数量
-	private static final int INTERVAL = 100;// 间隔时间扫描任务集合(毫秒)
-	private static final int THREAD_TIME_OUT = 1200; // 线程执行超时时间(秒)
+	// 线程池对象
+	private static ExecutorService threadPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, TIMEOUT,
+			TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(QUEUE_SIZE), Executors.defaultThreadFactory(),
+			new ThreadPoolExecutor.DiscardPolicy());
 
-	// 静态代码块
-	static {
-		new Thread() {
-			public void run() {
-				while (true) {
-					try {
-						if (tasks.size() > 0) {
-							taskCount++;
-							System.out.println("总任务数量:"+tasks.size()+", 运行中的任务数量:"+taskCount);
-							Runnable task = tasks.removeFirst();
-							execute(task);
-							while (taskCount > MAX) {
-								try {
-									Thread.sleep(INTERVAL);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
-							}
-						}
-						Thread.sleep(INTERVAL);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			};
-		}.start();
-	}
+	private volatile static BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>(); // 临时任务队列
+	private static AtomicInteger taskCount = new AtomicInteger(); // 运行中的线程数量
 
-	/**
-	 * 把线程任务添加到任务队列中
-	 * 
-	 * @param task
-	 */
-	public static void executeOnNewThread(Runnable task) {
-		tasks.add(task);
-	}
+	// 标记
+	private volatile static boolean scan = false;
 
 	/**
 	 * 在线程池中执行线程任务
 	 * 
 	 * @param task
+	 * @throws InterruptedException 
 	 */
 	public static void execute(Runnable task) {
-		Runnable run = new Runnable() {
+		Runnable runnable = new Runnable() {
+			@Override
 			public void run() {
-				Future<?> future = executor.submit(task);
-				try {
-					future.get(THREAD_TIME_OUT, TimeUnit.SECONDS);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					e.printStackTrace();
-				} catch (TimeoutException e) {
-					future.cancel(true);// 取消任务
-					System.out.println("任务超时,取消任务!");
-				} finally {
-					taskCount--;
-				}
-			};
+				task.run();
+				taskCount.getAndDecrement();
+			}
 		};
-		executor.execute(run);
+		taskQueue.add(runnable);
+		if (!scan) {
+			scan = true;
+			startScan();
+		}
+	}
+
+	// 开启任务扫描
+	private static void startScan() {
+		Timer timer = new Timer();
+		TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+				int count = taskCount.get();
+				while (count < MAX_TASK_COUNT && taskQueue.size() > 0) {
+					count = taskCount.incrementAndGet();
+					Runnable task = taskQueue.remove();
+					threadPool.execute(task);
+				}
+				if (taskQueue.size() == 0) {
+					scan = false;
+					timer.cancel();
+				}
+			}
+		};
+
+		timer.schedule(task, 0, 2000);
+	}
+
+	public static int getTaskCount() {
+		return taskCount.get();
+	}
+
+	public static int getTaskQueueSize() {
+		return taskQueue.size();
 	}
 
 

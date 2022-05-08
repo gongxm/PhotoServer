@@ -108,7 +108,7 @@
 			</div>
 		</div>
 
-		<#if (recommendList?size>0)>
+		<#if recommendList?? && (recommendList?size>0)>
 			<div class="row mr-0">
 				<div class="col-12">
 					<h6>

@@ -1,14 +1,16 @@
 package com.gongxm.photo.action;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jsoup.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,6 +45,9 @@ public class ListPageAction {
 	CategoryService categoryService;
 	@Autowired
 	ImageService imageService;
+	
+	@Value("${static-path}")
+	String static_path;
 
 	// 列表页
 	@RequestMapping({ "/", "/index.html", "/page/{page}" })
@@ -66,7 +71,7 @@ public class ListPageAction {
 		view.setViewName("index");
 		return view;
 	}
-	
+
 	@Autowired
 	Configuration configuration;
 
@@ -117,16 +122,16 @@ public class ListPageAction {
 			map.put("page", pageItem);
 			map.put("recommendList", recommendList);
 			// 4.创建 Writer 对象,代表生成的源代码会存放到哪里
-			File dir = new File("E:\\www\\photos\\"+pageNumber+"\\"+id);
-			if(!dir.exists()) {
+			File dir = new File(static_path, pageNumber + "/" + id);
+			if (!dir.exists()) {
 				dir.mkdirs();
 			}
-			Writer out = new FileWriter(new File(dir,page+".html"));
+			OutputStream out = new FileOutputStream(new File(dir, page + ".html"));
+			OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
 			// 5.输出
-			template.process(map, out);
+			template.process(map, writer);
 			// 6 关闭流
 			out.close();
-			System.out.println("执行了........");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -141,8 +146,8 @@ public class ListPageAction {
 		List<ImageGroupInfo> recommendList = imageGroupInfoService.findLastRecommend();
 		StringBuilder sb = new StringBuilder();
 		for (ImageGroupInfo info : recommendList) {
-			sb.append("<div class='col-md-2 col-4 mb-3 pr-0'><a href='/p/").append(info.getId()).append("'><img src='")
-					.append(info.getCover()).append("' class='w-100'></a></div>");
+			sb.append("<div class='col-md-2 col-4 mb-3 pr-0'><a href='/p/").append(info.getId()).append("'><img src=\"")
+					.append(info.getCover()).append("\" class='w-100'></a></div>");
 		}
 		return sb.toString();
 	}

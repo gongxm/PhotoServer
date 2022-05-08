@@ -13,6 +13,7 @@ import com.gongxm.photo.pojo.Category;
 import com.gongxm.photo.pojo.ImageCategoryRelation;
 import com.gongxm.photo.pojo.ImageGroupInfo;
 import com.gongxm.photo.pojo.ImagePage;
+import com.gongxm.photo.service.CategoryService;
 import com.gongxm.photo.service.ImageGroupInfoService;
 import com.gongxm.photo.service.PhotoService;
 import com.gongxm.photo.utils.HttpUtils;
@@ -30,32 +31,39 @@ public class ImagePageCollectRunnable implements Runnable {
 		PhotoService photoService = BeanContext.getApplicationContext().getBean(PhotoService.class);
 		ImageGroupInfoService imageGroupInfoService = BeanContext.getApplicationContext()
 				.getBean(ImageGroupInfoService.class);
+		/*CategoryService categoryService = BeanContext.getApplicationContext()
+				.getBean(CategoryService.class);*/
 		String groupInfoId = groupInfo.getId();
 		String baseUrl = groupInfo.getUrl();
 		try {
 			int index = 1;
 			while (true) {
-				String url = baseUrl + "/" + index;
-				System.out.println("采集:" + url);
+				String url = baseUrl + "-" + index;
+				System.out.println("Collect:" + url);
 				ImagePage page = new ImagePage(url, groupInfoId, index);
 				try {
-					photoService.addImagePage(page);
+					ImagePage dbPage = photoService.findImagePageById(page.getId());
+					if(dbPage!=null) {
+						System.out.println("该链接已经采集过了,跳过:"+url);
+					}else {
+						photoService.addImagePage(page);
+					}
 				} catch (Exception e1) {
-					System.out.println("添加图片页面链接失败,原因:" + e1.getMessage());
+					System.out.println("add image page link error, because:" + e1.getMessage());
 				}
 				Document doc = HttpUtils.getDocument(url);
 
-				if (index == 1) {
+				/*if (index == 1) {
 					Elements tags = doc.select("body>div.container>div.row>div.col-md-12>div.mb-3>a");
 					if (tags != null && tags.size() > 1) {
 						String type = "";
 						String country = "";
 						for (int i = 0; i < tags.size(); i++) {
-
+				
 							Element tagElement = tags.get(i);
 							String tag = tagElement.text();
 							if (StringUtil.isBlank(tag) || "首页".equals(tag) || "正文".equals(tag)) {
-								System.out.println("无效标签,跳过...");
+								System.out.println("Invalid tag, jump...");
 								continue;
 							}
 							if (i == 0) {
@@ -75,29 +83,31 @@ public class ImagePageCollectRunnable implements Runnable {
 								country = "";
 								type = "3";
 							}
-
+				
 							// 查找是否有该标签
-							Category category = photoService.findCategoryByTag(tag);
+							Category category = categoryService.findCategoryByTag(tag);
 							if (category != null) {
 								Integer tagId = category.getId();
 								ImageCategoryRelation relation = photoService.findImageCategoryRelation(groupInfoId,
 										tagId);
 								if (relation != null) {
-									System.out.println("标签存在,跳过...");
+									System.out.println("tag has exist, jump...");
 									continue;
 								}
-								System.out.println("添加已有标签:" + tag);
+								System.out.println("add tag relation:" + tag);
 								photoService.addImageCategoryRelation(groupInfoId, tagId);
 							} else {
-								System.out.println("添加新标签:" + tag);
+								System.out.println("add new tag:" + tag);
 								photoService.addImageCategoryRelation(groupInfoId, tag, country + type);
 							}
 						}
 					}
-				}
+				}*/
 
 				try {
-					Element e = doc.selectFirst(".pagination");
+					System.out.println("查找下一页...");
+//					Element e = doc.selectFirst(".pagination");
+					Element e = doc.selectFirst(".ft24");
 					if (!e.text().contains("下一页")) {
 						break;
 					}
@@ -108,10 +118,10 @@ public class ImagePageCollectRunnable implements Runnable {
 			}
 			groupInfo.setStatus(MyConstants.COLLECT_STATUS_COLLECTED);
 			imageGroupInfoService.updateImageGroupInfo(groupInfo);
-			System.out.println(baseUrl + ":采集完成!");
+			System.out.println(baseUrl + ":collect finish!");
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.out.println(baseUrl + ":采集出错!");
+			System.out.println(baseUrl + ":collect error!");
 		}
 
 	}

@@ -38,9 +38,15 @@ public class ImageGroupCollectRunnable implements Runnable {
 						String title = div.selectFirst(".my-1").text();
 						try {
 							ImageGroupInfo groupInfo = new ImageGroupInfo(cover,title,absUrl);
-							imageGroupInfoService.addImageGroupInfo(groupInfo);
+							ImageGroupInfo dbInfo = imageGroupInfoService.findImageGroupInfoById(groupInfo.getId());
+							if(dbInfo!=null) {
+								System.out.println(dbInfo.getTitle()+"已存在,跳过");
+							}else {
+								imageGroupInfoService.addImageGroupInfo(groupInfo);
+							}
 						} catch (Exception e) {
-							System.out.println("添加图片组失败:"+absUrl+", 原因:"+e.getMessage());
+							e.printStackTrace();
+							System.out.println("Add ImageGroupInfo Error:"+absUrl+", Because:"+e.getMessage());
 						}
 					}
 				}
